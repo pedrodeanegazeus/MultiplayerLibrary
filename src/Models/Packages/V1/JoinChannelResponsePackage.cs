@@ -10,10 +10,10 @@ public class JoinChannelResponsePackage : Package, IPackage
 
     bool IPackage.Compressed => false;
 
-    [Order(1)]
+    [PackageFieldAttribute(1, FieldType.Guid)]
     public Guid ChannelId { get; }
 
-    [Order(2)]
+    [PackageFieldAttribute(2, FieldType.String)]
     public string Channel { get; }
 
     public JoinChannelResponsePackage(Guid channelId, string channel)
