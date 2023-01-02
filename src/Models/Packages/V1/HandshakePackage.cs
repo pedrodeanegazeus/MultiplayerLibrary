@@ -10,7 +10,7 @@ public class HandshakePackage : Package, IPackage
 
     bool IPackage.Compressed => false;
 
-    [Order(1)]
+    [PackageFieldAttribute(1, FieldType.Guid)]
     public Guid To { get; }
 
     public HandshakePackage(Guid to)

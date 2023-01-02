@@ -10,7 +10,7 @@ public class LeaveChannelPackage : Package, IPackage
 
     bool IPackage.Compressed => false;
 
-    [Order(1)]
+    [PackageFieldAttribute(1, FieldType.String)]
     public string Channel { get; }
 
     public LeaveChannelPackage(string channel)

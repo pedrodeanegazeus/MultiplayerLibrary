@@ -1,8 +1,10 @@
 using System.Net.Sockets;
+using MultiplayerLibrary.Exceptions;
 using MultiplayerLibrary.Extensions;
 using MultiplayerLibrary.Interfaces.Handlers;
 using MultiplayerLibrary.Interfaces.Models;
 using MultiplayerLibrary.Interfaces.Services;
+using MultiplayerLibrary.Models.Packages.V1;
 
 namespace MultiplayerLibrary.Handlers;
 
@@ -87,6 +89,11 @@ internal class ConnectionHandler : IConnectionHandler
                     await HandlePackageAsync(buffer[0..bytesRead]);
                 }
             }
+        }
+        catch (MultiplayerException ex)
+        {
+            ErrorPackage errorPackage = new(ex.Code, ex.Message);
+            await SendAsync(errorPackage);
         }
         catch (Exception ex)
         {

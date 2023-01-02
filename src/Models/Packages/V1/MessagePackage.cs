@@ -10,13 +10,13 @@ public class MessagePackage : Package, IPackage
 
     bool IPackage.Compressed => true;
 
-    [Order(1)]
+    [PackageFieldAttribute(1, FieldType.Guid)]
     public Guid From { get; }
 
-    [Order(2)]
+    [PackageFieldAttribute(2, FieldType.Guid)]
     public Guid To { get; }
 
-    [Order(3)]
+    [PackageFieldAttribute(3, FieldType.String)]
     public string Message { get; }
 
     public MessagePackage(Guid from, Guid to, string message)
