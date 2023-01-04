@@ -25,9 +25,6 @@ public enum PackageType : short
 
 public abstract class Package
 {
-    public abstract PackageType Type { get; }
-    public abstract byte Version { get; }
-
     public static async Task<TPackage> CreateAsync<TPackage>(byte[] bytes)
         where TPackage : Package
     {

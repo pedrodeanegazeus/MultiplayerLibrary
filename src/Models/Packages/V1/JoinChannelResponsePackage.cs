@@ -6,8 +6,8 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class JoinChannelResponsePackage : Package, IPackage
 {
-    public override PackageType Type => PackageType.JoinChannelResponse;
-    public override byte Version => 1;
+    public PackageType Type => PackageType.JoinChannelResponse;
+    public byte Version => 1;
 
     bool IPackage.Compressed => false;
 

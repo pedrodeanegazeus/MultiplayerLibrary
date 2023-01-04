@@ -6,8 +6,8 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class MessagePackage : Package, IPackage
 {
-    public override PackageType Type => PackageType.Message;
-    public override byte Version => 1;
+    public PackageType Type => PackageType.Message;
+    public byte Version => 1;
 
     bool IPackage.Compressed => true;
 

@@ -35,18 +35,21 @@ internal class ConnectionHandler : IConnectionHandler
         if (NetworkStream is null || TcpClient is null) throw new InvalidOperationException("ConnectionHandler is not initialized, run Initialize");
         if (TcpClient.Connected)
         {
-            byte[] packageBytes = await package.ToByteArrayAsync();
+            byte[] payloadBytes = await package.ToByteArrayAsync();
+            byte[] packageBytes = new byte[3 + payloadBytes.Length];
+            Array.Copy(((short)package.Type).ToByteArray(), packageBytes, 2);
+            packageBytes[2] = package.Version;
+            Array.Copy(payloadBytes, 0, packageBytes, 3, payloadBytes.Length);
             if (package.Compressed)
             {
                 packageBytes = await CompressionService.GzipPackageAsync(packageBytes);
             }
-            byte[] bytes = new byte[3 + packageBytes.Length]; // size (2 bytes) + is compressed (1 byte) + package
-            byte[] packageLengthBytes = ((short)packageBytes.Length).ToByteArray();
-            Array.Copy(packageLengthBytes, 0, bytes, 0, 2);
-            bytes[2] = (byte)(package.Compressed ? 1 : 0);
-            Array.Copy(packageBytes, 0, bytes, 3, packageBytes.Length);
-            await NetworkStream.WriteAsync(bytes);
-            return bytes.Length;
+            byte[] bytesToSend = new byte[3 + packageBytes.Length]; // size (2 bytes) + is compressed (1 byte) + package
+            Array.Copy(((short)packageBytes.Length).ToByteArray(), bytesToSend, 2);
+            bytesToSend[2] = (byte)(package.Compressed ? 1 : 0);
+            Array.Copy(packageBytes, 0, bytesToSend, 3, packageBytes.Length);
+            await NetworkStream.WriteAsync(bytesToSend);
+            return bytesToSend.Length;
         }
         return 0;
     }

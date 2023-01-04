@@ -6,8 +6,8 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class ErrorPackage : Package, IPackage
 {
-    public override PackageType Type => PackageType.Error;
-    public override byte Version => 1;
+    public PackageType Type => PackageType.Error;
+    public byte Version => 1;
 
     bool IPackage.Compressed => false;
 

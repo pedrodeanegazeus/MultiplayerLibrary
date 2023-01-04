@@ -6,8 +6,8 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class LeaveChannelPackage : Package, IPackage
 {
-    public override PackageType Type => PackageType.LeaveChannel;
-    public override byte Version => 1;
+    public PackageType Type => PackageType.LeaveChannel;
+    public byte Version => 1;
 
     bool IPackage.Compressed => false;
 
