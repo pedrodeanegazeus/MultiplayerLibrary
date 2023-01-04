@@ -21,6 +21,7 @@ public enum PackageType : short
 
     // 2 - Authentication packages
     Authenticate = 2000,
+    AuthenticateResponse = 2001,
 }
 
 public abstract class Package
@@ -97,9 +98,10 @@ public abstract class Package
 
     private static async Task AssembleString(MemoryStream packageStream, List<object> arguments)
     {
-        byte[] stringValueSize = new byte[2];
-        await packageStream.ReadExactlyAsync(stringValueSize);
-        byte[] stringValueBytes = new byte[stringValueSize.ToShort()];
+        byte[] stringValueSizeBytes = new byte[2];
+        await packageStream.ReadExactlyAsync(stringValueSizeBytes);
+        short stringValueSize = stringValueSizeBytes.ToShort();
+        byte[] stringValueBytes = new byte[stringValueSize];
         await packageStream.ReadExactlyAsync(stringValueBytes);
         string stringValue = stringValueBytes.ToUTF8String();
         arguments.Add(stringValue);

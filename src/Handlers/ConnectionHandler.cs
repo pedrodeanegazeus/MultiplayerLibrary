@@ -30,6 +30,7 @@ internal class ConnectionHandler : IConnectionHandler
         _ = ReceivePackagesAsync();
     }
 
+    /// <exception cref="InvalidOperationException" />
     public async Task<int> SendAsync(IPackage package)
     {
         if (NetworkStream is null || TcpClient is null) throw new InvalidOperationException("ConnectionHandler is not initialized, run Initialize");
