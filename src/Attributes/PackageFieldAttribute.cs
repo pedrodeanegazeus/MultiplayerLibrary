@@ -2,8 +2,8 @@
 
 public enum FieldType
 {
-    Channels,
     Guid,
+    GuidArray,
     Short,
     String,
 }

@@ -8,4 +8,9 @@ public class PingPackage : Package, IPackage
     public override byte Version => 1;
 
     bool IPackage.Compressed => false;
+
+    public Task<byte[]> ToByteArrayAsync()
+    {
+        return Task.FromResult(Array.Empty<byte>());
+    }
 }

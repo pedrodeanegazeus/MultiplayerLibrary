@@ -1,4 +1,5 @@
 ﻿using MultiplayerLibrary.Attributes;
+using MultiplayerLibrary.Extensions;
 using MultiplayerLibrary.Interfaces.Models;
 
 namespace MultiplayerLibrary.Models.Packages.V1;
@@ -24,5 +25,21 @@ public class MessagePackage : Package, IPackage
         From = from;
         To = to;
         Message = message;
+    }
+
+    public async Task<byte[]> ToByteArrayAsync()
+    {
+        using MemoryStream packageStream = new();
+        // From
+        byte[] fromBytes = From.ToByteArray();
+        await packageStream.WriteAsync(fromBytes);
+        // To
+        byte[] toBytes = To.ToByteArray();
+        await packageStream.WriteAsync(toBytes);
+        // Message
+        byte[] messageBytes = Message.ToUTF8ByteArray();
+        await packageStream.WriteAsync(((short)messageBytes.Length).ToByteArray());
+        await packageStream.WriteAsync(messageBytes);
+        return packageStream.ToArray();
     }
 }

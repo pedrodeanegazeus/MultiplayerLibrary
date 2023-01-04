@@ -4,31 +4,24 @@ using MultiplayerLibrary.Interfaces.Models;
 
 namespace MultiplayerLibrary.Models.Packages.V1;
 
-public class JoinChannelResponsePackage : Package, IPackage
+public class ListChannelPackage : Package, IPackage
 {
-    public override PackageType Type => PackageType.JoinChannelResponse;
+    public override PackageType Type => PackageType.ListChannel;
     public override byte Version => 1;
 
     bool IPackage.Compressed => false;
 
-    [PackageFieldAttribute(1, FieldType.Guid)]
-    public Guid ChannelId { get; }
-
-    [PackageFieldAttribute(2, FieldType.String)]
+    [PackageFieldAttribute(1, FieldType.String)]
     public string ChannelName { get; }
 
-    public JoinChannelResponsePackage(Guid channelId, string channelName)
+    public ListChannelPackage(string channelName)
     {
-        ChannelId = channelId;
         ChannelName = channelName;
     }
 
     public async Task<byte[]> ToByteArrayAsync()
     {
         using MemoryStream packageStream = new();
-        // ChannelId
-        byte[] channelIdBytes = ChannelId.ToByteArray();
-        await packageStream.WriteAsync(channelIdBytes);
         // ChannelName
         byte[] channelNameBytes = ChannelName.ToUTF8ByteArray();
         await packageStream.WriteAsync(((short)channelNameBytes.Length).ToByteArray());

@@ -4,12 +4,12 @@ using MultiplayerLibrary.Interfaces.Models;
 
 namespace MultiplayerLibrary.Models.Packages.V1;
 
-public class JoinChannelResponsePackage : Package, IPackage
+public class ListChannelResponsePackage : Package, IPackage
 {
-    public override PackageType Type => PackageType.JoinChannelResponse;
+    public override PackageType Type => PackageType.ListChannelResponse;
     public override byte Version => 1;
 
-    bool IPackage.Compressed => false;
+    bool IPackage.Compressed => true;
 
     [PackageFieldAttribute(1, FieldType.Guid)]
     public Guid ChannelId { get; }
@@ -17,10 +17,14 @@ public class JoinChannelResponsePackage : Package, IPackage
     [PackageFieldAttribute(2, FieldType.String)]
     public string ChannelName { get; }
 
-    public JoinChannelResponsePackage(Guid channelId, string channelName)
+    [PackageFieldAttribute(3, FieldType.GuidArray)]
+    public Guid[] Connections { get; }
+
+    public ListChannelResponsePackage(Guid channelId, string channelName, Guid[] connections)
     {
         ChannelId = channelId;
         ChannelName = channelName;
+        Connections = connections;
     }
 
     public async Task<byte[]> ToByteArrayAsync()
@@ -33,6 +37,13 @@ public class JoinChannelResponsePackage : Package, IPackage
         byte[] channelNameBytes = ChannelName.ToUTF8ByteArray();
         await packageStream.WriteAsync(((short)channelNameBytes.Length).ToByteArray());
         await packageStream.WriteAsync(channelNameBytes);
+        // Connections
+        await packageStream.WriteAsync(((short)Connections.Length).ToByteArray());
+        foreach (Guid connection in Connections)
+        {
+            byte[] connectionValueBytes = connection.ToByteArray();
+            await packageStream.WriteAsync(connectionValueBytes);
+        }
         return packageStream.ToArray();
     }
 }

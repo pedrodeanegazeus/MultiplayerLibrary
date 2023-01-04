@@ -17,4 +17,13 @@ public class HandshakePackage : Package, IPackage
     {
         To = to;
     }
+
+    public async Task<byte[]> ToByteArrayAsync()
+    {
+        using MemoryStream packageStream = new();
+        // To
+        byte[] toBytes = To.ToByteArray();
+        await packageStream.WriteAsync(toBytes);
+        return packageStream.ToArray();
+    }
 }
