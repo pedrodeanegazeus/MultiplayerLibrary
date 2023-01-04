@@ -8,16 +8,19 @@ public enum PackageType : short
 {
     // 0 - Service packages
     Error = 0000,
-    Ping = 0001,
-    Handshake = 0002,
+    Handshake = 0001,
+    Ping = 0002,
 
     // 1 - Communication packages
-    Message = 1000,
-    JoinChannel = 1001,
-    JoinChannelResponse = 1002,
-    LeaveChannel = 1003,
-    ListChannels = 1004,
-    ListChannelsResponse = 1005,
+    JoinChannel = 1000,
+    JoinChannelResponse = 1001,
+    LeaveChannel = 1002,
+    ListChannels = 1003,
+    ListChannelsResponse = 1004,
+    Message = 1005,
+
+    // 2 - Authentication packages
+    Authenticate = 2000,
 }
 
 public abstract class Package
@@ -80,16 +83,14 @@ public abstract class Package
     public static async Task<TPackage> CreateAsync<TPackage>(byte[] bytes)
         where TPackage : Package
     {
-        using MemoryStream packageStream = new(bytes);
-        byte[] header = new byte[3]; // package type (2 bytes) + version (1 byte)
-        await packageStream.ReadExactlyAsync(header);
-        List<object> arguments = new();
         Type type = typeof(TPackage);
         PropertyInfo[] properties = type.GetProperties();
         IOrderedEnumerable<PackageFieldAttribute?> orderedAttributes = properties
             .Where(property => Attribute.IsDefined(property, typeof(PackageFieldAttribute)))
             .Select(property => property.GetCustomAttribute<PackageFieldAttribute>())
             .OrderBy(property => property?.Order);
+        List<object> arguments = new();
+        using MemoryStream packageStream = new(bytes);
         foreach (PackageFieldAttribute? attribute in orderedAttributes)
         {
             switch (attribute?.Type)
