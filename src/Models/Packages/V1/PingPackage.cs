@@ -4,7 +4,7 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class PingPackage : Package, IPackage
 {
-    public PackageType Type => PackageType.Ping;
+    public ushort Type => (ushort)PackageType.Ping;
     public byte Version => 1;
 
     bool IPackage.Compressed => false;

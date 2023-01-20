@@ -6,15 +6,15 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class AuthenticateResponsePackage : Package, IPackage
 {
-    public PackageType Type => PackageType.AuthenticateResponse;
+    public ushort Type => (ushort)PackageType.AuthenticateResponse;
     public byte Version => 1;
 
     bool IPackage.Compressed => true;
 
-    [PackageFieldAttribute(1, FieldType.String)]
+    [PackageField(1, FieldType.String)]
     public string AvatarUrl { get; }
 
-    [PackageFieldAttribute(2, FieldType.String)]
+    [PackageField(2, FieldType.String)]
     public string DisplayName { get; }
 
     public AuthenticateResponsePackage(string avatarUrl, string displayName)

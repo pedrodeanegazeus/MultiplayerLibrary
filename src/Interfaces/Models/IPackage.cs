@@ -4,7 +4,7 @@ namespace MultiplayerLibrary.Interfaces.Models;
 
 public interface IPackage
 {
-    PackageType Type { get; }
+    ushort Type { get; }
     byte Version { get; }
 
     protected internal bool Compressed { get; }

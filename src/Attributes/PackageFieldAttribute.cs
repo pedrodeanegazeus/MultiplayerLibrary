@@ -2,6 +2,7 @@
 
 public enum FieldType
 {
+    PlayerInfoArray,
     Guid,
     GuidArray,
     Short,

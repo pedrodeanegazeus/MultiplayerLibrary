@@ -6,15 +6,15 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class JoinChannelResponsePackage : Package, IPackage
 {
-    public PackageType Type => PackageType.JoinChannelResponse;
+    public ushort Type => (ushort)PackageType.JoinChannelResponse;
     public byte Version => 1;
 
     bool IPackage.Compressed => false;
 
-    [PackageFieldAttribute(1, FieldType.Guid)]
+    [PackageField(1, FieldType.Guid)]
     public Guid ChannelId { get; }
 
-    [PackageFieldAttribute(2, FieldType.String)]
+    [PackageField(2, FieldType.String)]
     public string ChannelName { get; }
 
     public JoinChannelResponsePackage(Guid channelId, string channelName)

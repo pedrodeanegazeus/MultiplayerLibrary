@@ -6,25 +6,25 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class ListChannelResponsePackage : Package, IPackage
 {
-    public PackageType Type => PackageType.ListChannelResponse;
+    public ushort Type => (ushort)PackageType.ListChannelResponse;
     public byte Version => 1;
 
     bool IPackage.Compressed => true;
 
-    [PackageFieldAttribute(1, FieldType.Guid)]
+    [PackageField(1, FieldType.Guid)]
     public Guid ChannelId { get; }
 
-    [PackageFieldAttribute(2, FieldType.String)]
+    [PackageField(2, FieldType.String)]
     public string ChannelName { get; }
 
-    [PackageFieldAttribute(3, FieldType.GuidArray)]
-    public Guid[] Connections { get; }
+    [PackageField(3, FieldType.PlayerInfoArray)]
+    public (Guid connection, string avatarUrl, string displayName)[] PlayersInfo { get; }
 
-    public ListChannelResponsePackage(Guid channelId, string channelName, Guid[] connections)
+    public ListChannelResponsePackage(Guid channelId, string channelName, (Guid, string, string)[] playersInfo)
     {
         ChannelId = channelId;
         ChannelName = channelName;
-        Connections = connections;
+        PlayersInfo = playersInfo;
     }
 
     public async Task<byte[]> ToByteArrayAsync()
@@ -38,11 +38,20 @@ public class ListChannelResponsePackage : Package, IPackage
         await packageStream.WriteAsync(((short)channelNameBytes.Length).ToByteArray());
         await packageStream.WriteAsync(channelNameBytes);
         // Connections
-        await packageStream.WriteAsync(((short)Connections.Length).ToByteArray());
-        foreach (Guid connection in Connections)
+        await packageStream.WriteAsync(((short)PlayersInfo.Length).ToByteArray());
+        foreach ((Guid connection, string avatarUrl, string displayName) in PlayersInfo)
         {
+            // Connection
             byte[] connectionValueBytes = connection.ToByteArray();
             await packageStream.WriteAsync(connectionValueBytes);
+            // AvatarUrl
+            byte[] avatarUrlValueBytes = avatarUrl.ToUTF8ByteArray();
+            await packageStream.WriteAsync(((short)avatarUrlValueBytes.Length).ToByteArray());
+            await packageStream.WriteAsync(avatarUrlValueBytes);
+            // DisplayName
+            byte[] displayNameValueBytes = displayName.ToUTF8ByteArray();
+            await packageStream.WriteAsync(((short)displayNameValueBytes.Length).ToByteArray());
+            await packageStream.WriteAsync(displayNameValueBytes);
         }
         return packageStream.ToArray();
     }

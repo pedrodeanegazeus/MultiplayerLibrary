@@ -6,12 +6,12 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class AuthenticatePackage : Package, IPackage
 {
-    public PackageType Type => PackageType.Authenticate;
+    public ushort Type => (ushort)PackageType.Authenticate;
     public byte Version => 1;
 
     bool IPackage.Compressed => false;
 
-    [PackageFieldAttribute(1, FieldType.String)]
+    [PackageField(1, FieldType.String)]
     public string Token { get; }
 
     public AuthenticatePackage(string token)

@@ -6,15 +6,15 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class ErrorPackage : Package, IPackage
 {
-    public PackageType Type => PackageType.Error;
+    public ushort Type => (ushort)PackageType.Error;
     public byte Version => 1;
 
     bool IPackage.Compressed => false;
 
-    [PackageFieldAttribute(1, FieldType.Short)]
+    [PackageField(1, FieldType.Short)]
     public short Code { get; }
 
-    [PackageFieldAttribute(2, FieldType.String)]
+    [PackageField(2, FieldType.String)]
     public string Message { get; }
 
     public ErrorPackage(short code, string message)

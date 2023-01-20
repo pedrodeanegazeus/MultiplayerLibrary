@@ -6,12 +6,12 @@ namespace MultiplayerLibrary.Models.Packages.V1;
 
 public class LeaveChannelPackage : Package, IPackage
 {
-    public PackageType Type => PackageType.LeaveChannel;
+    public ushort Type => (ushort)PackageType.LeaveChannel;
     public byte Version => 1;
 
     bool IPackage.Compressed => false;
 
-    [PackageFieldAttribute(1, FieldType.String)]
+    [PackageField(1, FieldType.String)]
     public string ChannelName { get; }
 
     public LeaveChannelPackage(string channelName)

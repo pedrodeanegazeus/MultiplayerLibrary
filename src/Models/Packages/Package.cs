@@ -4,24 +4,24 @@ using MultiplayerLibrary.Extensions;
 
 namespace MultiplayerLibrary.Models.Packages;
 
-public enum PackageType : short
+public enum PackageType : ushort
 {
     // 0 - Service packages
-    Error = 0000,
-    Handshake = 0001,
-    Ping = 0002,
+    Error = 000,
+    Handshake = 001,
+    Ping = 002,
 
     // 1 - Communication packages
-    JoinChannel = 1000,
-    JoinChannelResponse = 1001,
-    LeaveChannel = 1002,
-    ListChannel = 1003,
-    ListChannelResponse = 1004,
-    Message = 1005,
+    JoinChannel = 100,
+    JoinChannelResponse = 101,
+    LeaveChannel = 102,
+    ListChannel = 103,
+    ListChannelResponse = 104,
+    Message = 105,
 
-    // 2 - Authentication packages
-    Authenticate = 2000,
-    AuthenticateResponse = 2001,
+    // 2 - Player packages
+    Authenticate = 200,
+    AuthenticateResponse = 201,
 }
 
 public abstract class Package
@@ -46,6 +46,9 @@ public abstract class Package
                     break;
                 case FieldType.GuidArray:
                     await AssembleGuidArray(packageStream, arguments);
+                    break;
+                case FieldType.PlayerInfoArray:
+                    await AssemblePlayerInfoArray(packageStream, arguments);
                     break;
                 case FieldType.Short:
                     await AssembleShort(packageStream, arguments);
@@ -86,6 +89,36 @@ public abstract class Package
             guidArray[it] = new(guidBytes);
         }
         arguments.Add(guidArray);
+    }
+
+    private static async Task AssemblePlayerInfoArray(MemoryStream packageStream, List<object> arguments)
+    {
+        byte[] connectionArrayLengthBytes = new byte[2];
+        await packageStream.ReadExactlyAsync(connectionArrayLengthBytes);
+        short connectionArrayLength = connectionArrayLengthBytes.ToShort();
+        (Guid connection, string avatarUrl, string displayName)[] connectionArray = new (Guid, string, string)[connectionArrayLength];
+        for (int it = 0; it < connectionArrayLength; it++)
+        {
+            // connection
+            byte[] connectionBytes = new byte[16];
+            await packageStream.ReadExactlyAsync(connectionBytes);
+            connectionArray[it].connection = new(connectionBytes);
+            // avatarUrl
+            byte[] avatarUrlValueSizeBytes = new byte[2];
+            await packageStream.ReadExactlyAsync(avatarUrlValueSizeBytes);
+            short avatarUrlValueSize = avatarUrlValueSizeBytes.ToShort();
+            byte[] avatarUrlValueBytes = new byte[avatarUrlValueSize];
+            await packageStream.ReadExactlyAsync(avatarUrlValueBytes);
+            connectionArray[it].avatarUrl = avatarUrlValueBytes.ToUTF8String();
+            // displayName
+            byte[] displayNameValueSizeBytes = new byte[2];
+            await packageStream.ReadExactlyAsync(displayNameValueSizeBytes);
+            short displayNameValueSize = displayNameValueSizeBytes.ToShort();
+            byte[] displayNameValueBytes = new byte[displayNameValueSize];
+            await packageStream.ReadExactlyAsync(displayNameValueBytes);
+            connectionArray[it].displayName = displayNameValueBytes.ToUTF8String();
+        }
+        arguments.Add(connectionArray);
     }
 
     private static async Task AssembleShort(MemoryStream packageStream, List<object> arguments)
