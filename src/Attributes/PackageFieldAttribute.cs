@@ -2,8 +2,9 @@
 
 public enum FieldType
 {
-    Channels,
+    PlayerInfoArray,
     Guid,
+    GuidArray,
     Short,
     String,
 }

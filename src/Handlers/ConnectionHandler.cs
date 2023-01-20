@@ -1,17 +1,15 @@
 using System.Net.Sockets;
-using MultiplayerLibrary.Exceptions;
 using MultiplayerLibrary.Extensions;
 using MultiplayerLibrary.Interfaces.Handlers;
 using MultiplayerLibrary.Interfaces.Models;
 using MultiplayerLibrary.Interfaces.Services;
-using MultiplayerLibrary.Models.Packages.V1;
 
 namespace MultiplayerLibrary.Handlers;
 
 internal class ConnectionHandler : IConnectionHandler
 {
     public event Action<Guid>? ClientDisconnected;
-    public event Action<Guid, byte[]>? PackageReceived;
+    public event Action<IConnectionHandler, byte[]>? PackageReceived;
     public event Action<Exception, string>? PackageReceivedError;
 
     public Guid Id { get; set; }
@@ -32,23 +30,27 @@ internal class ConnectionHandler : IConnectionHandler
         _ = ReceivePackagesAsync();
     }
 
+    /// <exception cref="InvalidOperationException" />
     public async Task<int> SendAsync(IPackage package)
     {
         if (NetworkStream is null || TcpClient is null) throw new InvalidOperationException("ConnectionHandler is not initialized, run Initialize");
         if (TcpClient.Connected)
         {
-            byte[] packageBytes = await package.ToByteArrayAsync();
+            byte[] payloadBytes = await package.ToByteArrayAsync();
+            byte[] packageBytes = new byte[3 + payloadBytes.Length];
+            Array.Copy(((short)package.Type).ToByteArray(), packageBytes, 2);
+            packageBytes[2] = package.Version;
+            Array.Copy(payloadBytes, 0, packageBytes, 3, payloadBytes.Length);
             if (package.Compressed)
             {
                 packageBytes = await CompressionService.GzipPackageAsync(packageBytes);
             }
-            byte[] bytes = new byte[3 + packageBytes.Length]; // size (2 bytes) + is compressed (1 byte) + package
-            byte[] packageLengthBytes = ((short)packageBytes.Length).ToByteArray();
-            Array.Copy(packageLengthBytes, 0, bytes, 0, 2);
-            bytes[2] = (byte)(package.Compressed ? 1 : 0);
-            Array.Copy(packageBytes, 0, bytes, 3, packageBytes.Length);
-            await NetworkStream.WriteAsync(bytes);
-            return bytes.Length;
+            byte[] bytesToSend = new byte[3 + packageBytes.Length]; // size (2 bytes) + is compressed (1 byte) + package
+            Array.Copy(((short)packageBytes.Length).ToByteArray(), bytesToSend, 2);
+            bytesToSend[2] = (byte)(package.Compressed ? 1 : 0);
+            Array.Copy(packageBytes, 0, bytesToSend, 3, packageBytes.Length);
+            await NetworkStream.WriteAsync(bytesToSend);
+            return bytesToSend.Length;
         }
         return 0;
     }
@@ -65,7 +67,7 @@ internal class ConnectionHandler : IConnectionHandler
                 ? await CompressionService.GunzipPackageAsync(bytes[index..(index + packageSize)])
                 : bytes[index..(index + packageSize)];
             index += packageSize;
-            PackageReceived?.Invoke(Id, packageBytes);
+            PackageReceived?.Invoke(this, packageBytes);
         }
     }
 
@@ -89,11 +91,6 @@ internal class ConnectionHandler : IConnectionHandler
                     await HandlePackageAsync(buffer[0..bytesRead]);
                 }
             }
-        }
-        catch (MultiplayerException ex)
-        {
-            ErrorPackage errorPackage = new(ex.Code, ex.Message);
-            await SendAsync(errorPackage);
         }
         catch (Exception ex)
         {
